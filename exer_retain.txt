@@ -1,0 +1,35 @@
+proc sort data=sashelp.cars out=cars;
+	by make;
+
+data cars_retain;
+	length all_models $10000;
+	set cars;
+	by make;
+	retain all_models;
+	if first.make then all_models= '';
+	if last.make = 0 then all_models = cats(model, '; ', all_models);
+
+	if last.make then do;
+		all_models = cats(upcase(make), ': {', model, '; ', all_models, '}');
+	end;
+run;
+ 
+
+data cars_retain_1;
+	set cars;
+	length all_models $10000;
+	by make;
+	retain all_models;
+	if first.make then all_models= '';
+	if last.make = 0 then all_models = cats(model, '; ', all_models);
+
+	if last.make then do;
+		all_models = cats(upcase(make), ': {', model, '; ', all_models, '}');
+		output;
+	end;
+	keep all_models make;
+run;
+
+proc sql;
+	select * from cars_retain_1;
+quit;
